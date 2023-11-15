@@ -9,7 +9,7 @@ repositories {
 tasks {
     sourceSets {
         main {
-            java.srcDirs("src")
+            java.srcDirs("kotlin")
         }
     }
 
@@ -18,10 +18,14 @@ tasks {
     }
 }
 
-abstract class DayGeneratorTask : DefaultTask() {
+abstract class KotlinDayGenerator : DefaultTask() {
     @get:Input
-    @get:Option(option = "day", description = "set the day")
+    @get:Option(option = "day", description = "day to create")
     abstract val day: Property<Int>
+
+    @get:Input
+    @get:Option(option = "force", description = "force - overrides the current file(s)")
+    abstract val force: Property<Boolean>
 
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
@@ -52,12 +56,114 @@ abstract class DayGeneratorTask : DefaultTask() {
             """.trimIndent()
 
         val targetFile = outputDir.file("Day$txtDay.kt").get().asFile
-        targetFile.writeText(content)
+        if (!targetFile.exists() || force.get()) {
+            targetFile.writeText(content)
+        }
     }
 }
 
-// Customize the greeting
-tasks.register<DayGeneratorTask>("createDay") {
+abstract class GolangDayGenerator : DefaultTask() {
+    @get:Input
+    @get:Option(option = "day", description = "day to create")
+    abstract val day: Property<Int>
+
+    @get:Input
+    @get:Option(option = "force", description = "force - overrides the current file(s)")
+    abstract val force: Property<Boolean>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun createFile() {
+        val txtDay = String.format("%02d", day.get())
+        val contentDay =
+            """
+                package day$txtDay
+    
+                func Part1(input []string) int {
+                    return 0
+                }
+    
+                func Part2(input []string) int {
+                    return 0
+                }
+
+            """.trimIndent()
+
+        val contentDayTest =
+            """
+                package day${txtDay}_test
+                
+                import (
+                	"testing"
+
+                	day "anisch.github.com/advent-of-code-2023/golang/day$txtDay"
+                	"anisch.github.com/advent-of-code-2023/golang/util"
+                	"github.com/stretchr/testify/assert"
+                )
+
+                func TestPart1(t *testing.T) {
+                	input, err := util.ReadFile("day_test")
+                	if err != nil {
+                		t.Error(err)
+                	}
+                	actual := day.Part1(input)
+
+                	assert.Equal(t, 0, actual)
+                }
+
+            """.trimIndent()
+
+        val contentMain =
+            """
+                package main
+
+                import (
+                	day "anisch.github.com/advent-of-code-2023/golang/day01"
+                	"anisch.github.com/advent-of-code-2023/golang/util"
+                )
+
+                func main() {
+                	input, err := util.ReadFile("day")
+                	if err != nil {
+                		panic(err)
+                	}
+
+                	println(day.Part1(input))
+                	println(day.Part2(input))
+                }
+
+            """.trimIndent()
+
+        outputDir.file("day$txtDay").get().asFile.mkdirs()
+        outputDir.file("bin/day$txtDay").get().asFile.mkdirs()
+
+        val targetFileDay = outputDir.file("day$txtDay/day.go").get().asFile
+        if (!targetFileDay.exists() || force.get()) {
+            targetFileDay.writeText(contentDay)
+        }
+
+        val targetFileDayTest = outputDir.file("day$txtDay/day_test.go").get().asFile
+        if (!targetFileDayTest.exists() || force.get()) {
+            targetFileDayTest.writeText(contentDayTest)
+        }
+
+        val targetFileMain = outputDir.file("bin/day$txtDay/main.go").get().asFile
+        if (!targetFileMain.exists() || force.get()) {
+            targetFileMain.writeText(contentMain)
+        }
+    }
+}
+
+tasks.register<KotlinDayGenerator>("kotlinCreateDay") {
     day = 1
-    outputDir = layout.projectDirectory.dir("src")
+    outputDir = layout.projectDirectory.dir("kotlin")
+    force = false
+}
+
+tasks.register<GolangDayGenerator>("goCreateDay") {
+    day = 1
+    outputDir = layout.projectDirectory.dir("golang")
+    force = false
 }
