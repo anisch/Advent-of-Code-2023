@@ -6,8 +6,9 @@ import (
 	"os"
 )
 
-func ReadFile(name string) ([]string, error) {
-	fileName := name + ".txt"
+func ReadFile(name string, rel string) ([]string, error) {
+
+	fileName := rel + "kotlin/resources/" + name + ".txt"
 
 	if _, err := os.Stat(fileName); err == nil {
 		var result []string

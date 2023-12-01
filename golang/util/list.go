@@ -1,14 +1,14 @@
 package util
 
-func ChunkedList[T any](input []T, size int) [][]T {
-	var result [][]T
+func Chunked[T ~[]A, A any](t T, size int) []T {
+	var result []T
 
-	var tmp []T
-	for i, v := range input {
-		tmp = append(tmp, v)
-		if (i+1)%size == 0 || i == len(input)-1 {
+	var tmp T
+	for i := range t {
+		tmp = append(tmp, t[i])
+		if (i+1)%size == 0 || i == len(t)-1 {
 			result = append(result, tmp)
-			tmp = []T{}
+			tmp = T{}
 		}
 	}
 
