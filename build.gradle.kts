@@ -1,21 +1,52 @@
+import kotlinx.benchmark.gradle.JvmBenchmarkTarget
+
 plugins {
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm") version "1.9.21"
+    kotlin("plugin.allopen") version "1.9.21"
+    id("org.jetbrains.kotlinx.benchmark") version "0.4.9"
+}
+
+tasks {
+    wrapper {
+        gradleVersion = "8.4"
+    }
 }
 
 repositories {
     mavenCentral()
 }
 
-tasks {
-    sourceSets {
-        main {
-            java.srcDirs("kotlin")
+// how to apply plugin to a specific source set?
+allOpen {
+    annotation("org.openjdk.jmh.annotations.State")
+}
+
+sourceSets {
+    main {
+        java.srcDirs("kotlin/main")
+        resources.srcDir("kotlin/resources")
+    }
+    test {
+        java.srcDirs("kotlin/test")
+    }
+}
+
+benchmark {
+    targets {
+        register("main") {
+            this as JvmBenchmarkTarget
+            jmhVersion = "1.21"
         }
     }
-
-    wrapper {
-        gradleVersion = "8.4"
+    sourceSets {
+        main {
+            java.srcDirs("kotlin/benchmark")
+        }
     }
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.9")
 }
 
 abstract class KotlinDayGenerator : DefaultTask() {
@@ -33,31 +64,83 @@ abstract class KotlinDayGenerator : DefaultTask() {
     @TaskAction
     fun createFile() {
         val txtDay = String.format("%02d", day.get())
-        val content =
-            """
-                fun main() {
-                    fun part1(input: List<String>): Int {
-                        return input.size
-                    }
-
-                    fun part2(input: List<String>): Int {
-                        return input.size
-                    }
-
-                    // test if implementation meets criteria from the description, like:
-                    val testInput = readInput("Day${txtDay}_test")
-                    check(part1(testInput) == 1)
-
-                    val input = readInput("Day$txtDay")
-                    part1(input).println()
-                    part2(input).println()
+        val mainContent = """
+            import Day${txtDay}.part1
+            import Day${txtDay}.part2
+            
+            fun main() {
+                fun part1(input: List<String>): Int {
+                    return input.size
                 }
 
-            """.trimIndent()
+                fun part2(input: List<String>): Int {
+                    return input.size
+                }
 
-        val targetFile = outputDir.file("Day$txtDay.kt").get().asFile
-        if (!targetFile.exists() || force.get()) {
-            targetFile.writeText(content)
+                // test if implementation meets criteria from the description, like:
+                val testInput = readInput("Day${txtDay}_test")
+                check(part1(testInput) == 1)
+
+                val input = readInput("Day$txtDay")
+                part1(input).println()
+                part2(input).println()
+            }
+            
+            object Day${txtDay} {
+                fun part1(input: List<String>): Int {
+                    return input.size
+                }
+            
+                fun part2(input: List<String>): Int {
+                    return input.size
+                }
+            }
+
+        """.trimIndent()
+
+        val benchmarkContent = """
+            package day
+
+            import Day${txtDay}.part1
+            import Day${txtDay}.part2
+            import org.openjdk.jmh.annotations.*
+            import readInput
+            import java.util.concurrent.TimeUnit
+
+            @State(Scope.Benchmark)
+            @Fork(1)
+            @Warmup(iterations = 5)
+            @Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+            class TestBenchmarkDay${txtDay} {
+
+                private lateinit var content: List<String>
+
+                @Setup
+                fun setUp() {
+                    content = readInput("Day${txtDay}_test")
+                }
+
+                @Benchmark
+                fun benchPart1(): Int {
+                    return part1(content)
+                }
+
+                @Benchmark
+                fun benchPart2(): Int {
+                    return part2(content)
+                }
+            }
+
+        """.trimIndent()
+
+        val targetMainFile = outputDir.file("main/Day$txtDay.kt").get().asFile
+        if (!targetMainFile.exists() || force.get()) {
+            targetMainFile.writeText(mainContent)
+        }
+
+        val targetBenchmarkFile = outputDir.file("benchmark/day/Day$txtDay.kt").get().asFile
+        if (!targetBenchmarkFile.exists() || force.get()) {
+            targetBenchmarkFile.writeText(benchmarkContent)
         }
     }
 }
@@ -77,64 +160,93 @@ abstract class GolangDayGenerator : DefaultTask() {
     @TaskAction
     fun createFile() {
         val txtDay = String.format("%02d", day.get())
-        val contentDay =
-            """
-                package day$txtDay
-    
-                func Part1(input []string) int {
-                    return 0
+        val contentDay = """
+            package day$txtDay
+
+            func Part1(input []string) int {
+                return 0
+            }
+
+            func Part2(input []string) int {
+                return 0
+            }
+
+        """.trimIndent()
+
+        val contentDayTest = """
+            package day${txtDay}_test
+            
+            import (
+                "testing"
+
+                day "anisch.github.com/advent-of-code-2023/golang/day$txtDay"
+                "anisch.github.com/advent-of-code-2023/golang/util"
+                "github.com/stretchr/testify/assert"
+            )
+
+            func TestPart1(t *testing.T) {
+                input, err := util.ReadFile("day_test")
+                if err != nil {
+                    t.Error(err)
                 }
-    
-                func Part2(input []string) int {
-                    return 0
+                actual := day.Part1(input)
+
+                assert.Equal(t, 0, actual)
+            }
+            
+            func TestPart2(t *testing.T) {
+                input, err := util.ReadFile("day_test")
+                if err != nil {
+                    t.Error(err)
                 }
+                actual := day.Part2(input)
 
-            """.trimIndent()
+                assert.Equal(t, 0, actual)
+            }
 
-        val contentDayTest =
-            """
-                package day${txtDay}_test
-                
-                import (
-                	"testing"
-
-                	day "anisch.github.com/advent-of-code-2023/golang/day$txtDay"
-                	"anisch.github.com/advent-of-code-2023/golang/util"
-                	"github.com/stretchr/testify/assert"
-                )
-
-                func TestPart1(t *testing.T) {
-                	input, err := util.ReadFile("day_test")
-                	if err != nil {
-                		t.Error(err)
-                	}
-                	actual := day.Part1(input)
-
-                	assert.Equal(t, 0, actual)
-                }
-
-            """.trimIndent()
-
-        val contentMain =
-            """
-                package main
-
-                import (
-                	day "anisch.github.com/advent-of-code-2023/golang/day01"
-                	"anisch.github.com/advent-of-code-2023/golang/util"
-                )
-
-                func main() {
-                	input, err := util.ReadFile("day")
-                	if err != nil {
-                		panic(err)
-                	}
-
-                	println(day.Part1(input))
-                	println(day.Part2(input))
+            func BenchmarkPart1(b *testing.B) {
+                input, err := util.ReadFile("day_test")
+                if err != nil {
+                    b.Error(err)
                 }
 
-            """.trimIndent()
+                for n := 0; n < b.N; n++ {
+                    day.Part1(input)
+                }
+            }
+
+            func BenchmarkPart2(b *testing.B) {
+                input, err := util.ReadFile("day_test")
+                if err != nil {
+                    b.Error(err)
+                }
+
+                for n := 0; n < b.N; n++ {
+                    day.Part2(input)
+                }
+            }
+
+        """.trimIndent()
+
+        val contentMain = """
+            package main
+
+            import (
+                day "anisch.github.com/advent-of-code-2023/golang/day01"
+                "anisch.github.com/advent-of-code-2023/golang/util"
+            )
+
+            func main() {
+                input, err := util.ReadFile("day")
+                if err != nil {
+                    panic(err)
+                }
+
+                println(day.Part1(input))
+                println(day.Part2(input))
+            }
+
+        """.trimIndent()
 
         outputDir.file("day$txtDay").get().asFile.mkdirs()
         outputDir.file("bin/day$txtDay").get().asFile.mkdirs()
