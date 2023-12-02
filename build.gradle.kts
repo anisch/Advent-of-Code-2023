@@ -69,21 +69,13 @@ abstract class KotlinDayGenerator : DefaultTask() {
             import Day${txtDay}.part2
             
             fun main() {
-                fun part1(input: List<String>): Int {
-                    return input.size
-                }
-
-                fun part2(input: List<String>): Int {
-                    return input.size
-                }
-
                 // test if implementation meets criteria from the description, like:
                 val testInput = readInput("Day${txtDay}_test")
                 check(part1(testInput) == 1)
 
                 val input = readInput("Day$txtDay")
-                part1(input).println()
-                part2(input).println()
+                println(part1(input))
+                println(part2(input))
             }
             
             object Day${txtDay} {
