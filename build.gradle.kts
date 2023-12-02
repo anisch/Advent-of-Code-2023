@@ -224,7 +224,7 @@ abstract class GolangDayGenerator : DefaultTask() {
             package main
 
             import (
-                day "anisch.github.com/advent-of-code-2023/golang/day01"
+                day "anisch.github.com/advent-of-code-2023/golang/day${txtDay}"
                 "anisch.github.com/advent-of-code-2023/golang/util"
             )
 
