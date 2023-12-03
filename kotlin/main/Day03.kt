@@ -44,9 +44,9 @@ object Day03 {
         .flatMapIndexed { y, text ->
             text
                 .mapIndexedNotNull { x, c ->
-                    if (c != '.' && !c.isDigit()) x else null
+                    if (c != '.' && !c.isDigit()) Symbol(x, y)
+                    else null
                 }
-                .map { x -> Vec2D(x, y) }
         }
 
     private fun parseNums(input: List<String>) = input
@@ -57,20 +57,14 @@ object Day03 {
         }
 }
 
+typealias Symbol = Vec2D
 
 data class PartNumber(val num: Int, val xRange: IntRange, val y: Int)
 
-fun PartNumber.touchesSymbol(vec: Vec2D): Boolean {
+fun PartNumber.touchesSymbol(symbol: Symbol): Boolean {
     val xRange = IntRange(xRange.first - 1, xRange.last + 1)
-    val yRange = IntRange(vec.y - 1, vec.y + 1)
-    return vec.x in xRange && y in yRange
+    val yRange = IntRange(y - 1, y + 1)
+    return symbol.x in xRange && symbol.y in yRange
 }
 
-fun PartNumber.touchesSymbol(symbols: List<Vec2D>): Boolean {
-    for (s in symbols) {
-        if (touchesSymbol(s)) {
-            return true
-        }
-    }
-    return false
-}
+fun PartNumber.touchesSymbol(symbols: List<Symbol>): Boolean = symbols.any { touchesSymbol(it) }
