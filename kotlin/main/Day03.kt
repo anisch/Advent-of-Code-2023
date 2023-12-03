@@ -8,8 +8,8 @@ fun main() {
     check(part2(testInput) == 467835)
 
     val input = readInput("Day03")
-    println(part1(input))
-    println(part2(input))
+    println(part1(input)) // 539433
+    println(part2(input)) // 75847567
 }
 
 object Day03 {
@@ -22,9 +22,7 @@ object Day03 {
         val nums = parseNums(input)
 
         return nums
-            .filter { part ->
-                part.touchesSymbols(symbols)
-            }
+            .filter { it.touchesSymbol(symbols) }
             .sumOf { it.num }
     }
 
@@ -32,7 +30,7 @@ object Day03 {
         val symbols = parseSymbols(input)
         val nums = parseNums(input)
 
-        val numsWithSymbols = nums.filter { it.touchesSymbols(symbols) }
+        val numsWithSymbols = nums.filter { it.touchesSymbol(symbols) }
 
         return symbols
             .mapNotNull { symbol ->
@@ -55,30 +53,22 @@ object Day03 {
         .flatMapIndexed { y, text ->
             regex
                 .findAll(text)
-                .map {
-                    PartNumber(it.value.toInt(), it.range, y)
-                }
+                .map { PartNumber(it.value.toInt(), it.range, y) }
         }
 }
 
 
 data class PartNumber(val num: Int, val xRange: IntRange, val y: Int)
 
-fun PartNumber.touchesSymbol(s: Vec2D): Boolean {
-    if (y !in s.y - 1..s.y + 1) {
-        return false
-    }
+fun PartNumber.touchesSymbol(vec: Vec2D): Boolean {
     val xRange = IntRange(xRange.first - 1, xRange.last + 1)
-    return s.x in xRange
+    val yRange = IntRange(vec.y - 1, vec.y + 1)
+    return vec.x in xRange && y in yRange
 }
 
-fun PartNumber.touchesSymbols(symbols: List<Vec2D>): Boolean {
+fun PartNumber.touchesSymbol(symbols: List<Vec2D>): Boolean {
     for (s in symbols) {
-        if (y !in s.y - 1..s.y + 1) {
-            continue
-        }
-        val xRange = IntRange(xRange.first - 1, xRange.last + 1)
-        if (s.x in xRange) {
+        if (touchesSymbol(s)) {
             return true
         }
     }

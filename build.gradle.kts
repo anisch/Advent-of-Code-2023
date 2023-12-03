@@ -177,7 +177,7 @@ abstract class GolangDayGenerator : DefaultTask() {
             )
 
             func TestPart1(t *testing.T) {
-                input, err := util.ReadFile("day_test")
+                input, err := util.ReadFile("Day${txtDay}_test")
                 if err != nil {
                     t.Error(err)
                 }
@@ -187,7 +187,7 @@ abstract class GolangDayGenerator : DefaultTask() {
             }
             
             func TestPart2(t *testing.T) {
-                input, err := util.ReadFile("day_test")
+                input, err := util.ReadFile("Day${txtDay}_test")
                 if err != nil {
                     t.Error(err)
                 }
@@ -197,7 +197,7 @@ abstract class GolangDayGenerator : DefaultTask() {
             }
 
             func BenchmarkPart1(b *testing.B) {
-                input, err := util.ReadFile("day_test")
+                input, err := util.ReadFile("Day${txtDay}")
                 if err != nil {
                     b.Error(err)
                 }
@@ -208,7 +208,7 @@ abstract class GolangDayGenerator : DefaultTask() {
             }
 
             func BenchmarkPart2(b *testing.B) {
-                input, err := util.ReadFile("day_test")
+                input, err := util.ReadFile("Day${txtDay}")
                 if err != nil {
                     b.Error(err)
                 }
@@ -229,7 +229,7 @@ abstract class GolangDayGenerator : DefaultTask() {
             )
 
             func main() {
-                input, err := util.ReadFile("day")
+                input, err := util.ReadFile("Day${txtDay}")
                 if err != nil {
                     panic(err)
                 }

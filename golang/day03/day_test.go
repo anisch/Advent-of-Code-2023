@@ -1,37 +1,35 @@
-package day02_test
+package day03_test
 
 import (
 	"testing"
 
-	day "anisch.github.com/advent-of-code-2023/golang/day02"
+	day "anisch.github.com/advent-of-code-2023/golang/day03"
 	"anisch.github.com/advent-of-code-2023/golang/util"
 	"github.com/stretchr/testify/assert"
 )
 
-const rel = "../../"
-
 func TestPart1(t *testing.T) {
-	input, err := util.ReadFile("Day02_test", rel)
+	input, err := util.ReadFile("Day03_test", "../../")
 	if err != nil {
 		t.Error(err)
 	}
 	actual := day.Part1(input)
 
-	assert.Equal(t, 8, actual)
+	assert.Equal(t, 4361, actual)
 }
 
 func TestPart2(t *testing.T) {
-	input, err := util.ReadFile("Day02_test", rel)
+	input, err := util.ReadFile("Day03_test", "../../")
 	if err != nil {
 		t.Error(err)
 	}
 	actual := day.Part2(input)
 
-	assert.Equal(t, 2286, actual)
+	assert.Equal(t, 467835, actual)
 }
 
 func BenchmarkPart1(b *testing.B) {
-	input, err := util.ReadFile("Day02", rel)
+	input, err := util.ReadFile("Day03", "../../")
 	if err != nil {
 		b.Error(err)
 	}
@@ -42,7 +40,7 @@ func BenchmarkPart1(b *testing.B) {
 }
 
 func BenchmarkPart2(b *testing.B) {
-	input, err := util.ReadFile("Day02", rel)
+	input, err := util.ReadFile("Day03", "../../")
 	if err != nil {
 		b.Error(err)
 	}
