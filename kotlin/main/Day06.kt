@@ -50,8 +50,8 @@ object Day06 {
             .first()
 
         return (0..time)
+            .asSequence()
             .map { speed -> speed * (time - speed) }
-            .filter { it > distance }
-            .size
+            .count { it > distance }
     }
 }
