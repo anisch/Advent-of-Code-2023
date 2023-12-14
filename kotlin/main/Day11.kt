@@ -61,43 +61,18 @@ enum class Universe(private val text: String) {
     override fun toString(): String = text
 }
 
-fun Image.emptyY(): List<Int> {
-    val result = mutableListOf<Int>()
-    for (y in indices) {
-        if (this[y].all { it == EMPTY }) {
-            result += y
-        }
-    }
-    return result
+fun Image.emptyY(): List<Int> = indices.filter { y -> this[y].all { it == EMPTY } }
+
+fun Image.emptyX(): List<Int> = first().indices.filter { x ->
+    indices.all { y -> this[y][x] == EMPTY }
 }
 
-fun Image.emptyX(): List<Int> {
-    val result = mutableListOf<Int>()
-    var x = 0
-    while (x < this[0].size) {
-        var allEmpty = true
-        for (y in indices) {
-            if (this[y][x] == GALAXY) {
-                allEmpty = false
-                break
-            }
+fun Image.findGalaxys(): List<Vec2D> = flatMapIndexed { y, line ->
+    line
+        .mapIndexedNotNull { x, cell ->
+            if (cell == GALAXY) Vec2D(x, y)
+            else null
         }
-        if (allEmpty) {
-            result += x
-        }
-        x++
-    }
-    return result
-}
-
-fun Image.findGalaxys(): List<Vec2D> {
-    val result = mutableListOf<Vec2D>()
-    forEachIndexed { y, line ->
-        line.forEachIndexed { x, cell ->
-            if (cell == GALAXY) result += Vec2D(x, y)
-        }
-    }
-    return result
 }
 
 fun List<Vec2D>.getDistances(
