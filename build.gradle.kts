@@ -3,7 +3,7 @@ import kotlinx.benchmark.gradle.JvmBenchmarkTarget
 plugins {
     kotlin("jvm") version "1.9.21"
     kotlin("plugin.allopen") version "1.9.21"
-    id("org.jetbrains.kotlinx.benchmark") version "0.4.9"
+    id("org.jetbrains.kotlinx.benchmark") version "0.4.10"
 }
 
 tasks {
@@ -32,6 +32,11 @@ sourceSets {
 }
 
 benchmark {
+    configurations {
+        named("main") {
+            includes += "Day14"
+        }
+    }
     targets {
         register("main") {
             this as JvmBenchmarkTarget
