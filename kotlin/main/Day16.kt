@@ -75,12 +75,9 @@ object Day16 {
 
         mf.isBeam = true
 
-
         if (mf.field == "|") {
             return when (d) {
-                UP, DOWN -> {
-                    beam(mm, v.next(d), d)
-                }
+                UP, DOWN -> beam(mm, v.next(d), d)
 
                 else -> {
                     beam(mm, v.next(UP), UP)
@@ -90,9 +87,7 @@ object Day16 {
         }
         if (mf.field == "-") {
             return when (d) {
-                LEFT, RIGHT -> {
-                    beam(mm, v.next(d), d)
-                }
+                LEFT, RIGHT -> beam(mm, v.next(d), d)
 
                 else -> {
                     beam(mm, v.next(LEFT), LEFT)
@@ -129,13 +124,11 @@ fun MirrorMap.copy() = map { row ->
 
 data class MirrorField(val field: String, var isBeam: Boolean = false)
 
-fun Vec2D.next(d: Direction): Vec2D {
-    return when (d) {
-        UP -> Vec2D(x, y - 1)
-        DOWN -> Vec2D(x, y + 1)
-        LEFT -> Vec2D(x - 1, y)
-        RIGHT -> Vec2D(x + 1, y)
-    }
+fun Vec2D.next(d: Direction): Vec2D = when (d) {
+    UP -> Vec2D(x, y - 1)
+    DOWN -> Vec2D(x, y + 1)
+    LEFT -> Vec2D(x - 1, y)
+    RIGHT -> Vec2D(x + 1, y)
 }
 
 enum class Direction {

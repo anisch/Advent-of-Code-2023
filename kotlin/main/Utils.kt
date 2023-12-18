@@ -30,7 +30,7 @@ fun MutableList<Any>.swap(a: Int, b: Int) {
 /**
  * Vector
  */
-data class Vec2D(val x: Int, val y: Int) {
+data class Vec2D(val x: Int = 0, val y: Int = 0) {
     operator fun plus(o: Vec2D) = Vec2D(x + o.x, y + o.y)
     operator fun minus(o: Vec2D) = Vec2D(x - o.x, y - o.y)
 }
